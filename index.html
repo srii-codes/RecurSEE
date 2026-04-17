@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>RecurSEE — Visualize Divide & Conquer</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+</head>
+<body>
+
+<!-- ── Sidebar ─────────────────────────────────────────────────────────── -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-icon">RS</div>
+    <div>
+      <div class="brand-name">RecurSEE</div>
+      <div class="brand-sub">Algorithm Visualizer</div>
+    </div>
+  </div>
+
+  <div class="sidebar-section-label">ALGORITHMS</div>
+  <nav class="algo-nav">
+    <button class="algo-btn active" data-algo="karatsuba">
+      <span class="algo-dot" style="background:#F2A7BB"></span>
+      Karatsuba
+    </button>
+    <button class="algo-btn" data-algo="maxsubarray">
+      <span class="algo-dot" style="background:#A8E6CF"></span>
+      Max Subarray
+    </button>
+    <button class="algo-btn" data-algo="strassen">
+      <span class="algo-dot" style="background:#A7C7E7"></span>
+      Strassen's Matrix Multiplication
+    </button>
+    <button class="algo-btn" data-algo="closestpair">
+      <span class="algo-dot" style="background:#C9B8E8"></span>
+      Closest Pair of Points
+    </button>
+  </nav>
+
+  <div class="sidebar-section-label" style="margin-top:24px">TOOLS</div>
+  <nav class="algo-nav">
+    <button class="algo-btn" data-algo="mastercalc">
+      <span class="algo-dot" style="background:#FFD4B2"></span>
+      Master Theorem
+    </button>
+  </nav>
+
+  <div class="sidebar-info" id="sidebarInfo"></div>
+
+  <div class="sidebar-complexity" id="sidebarComplexity"></div>
+</aside>
+
+<!-- ── Main ───────────────────────────────────────────────────────────── -->
+<main class="main">
+  <!-- Page: Intro -->
+  <section class="page" id="page-intro">
+    <div class="hero-card">
+      <div class="hero-title">
+        What is Divide and Conquer?
+      </div>
+<p>Imagine facing a massive, complex problem. Instead of attacking it all at once, you break it into smaller, identical pieces. You solve those tiny pieces, then stitch the results back together to solve the original task.</p>
+ This is Divide and Conquer—the secret sauce behind some of the world's fastest algorithms.<br>
+<p><h3><strong>Why use RecurSEE?</strong></p></h3>
+<p>Recursion is often hard to visualize because so much happens "under the hood." RecurSEE pulls back the curtain.</p>
+<p><u>See the Split:</u> Watch how large datasets are chopped into manageable sub-problems.</p>
+<p><u>Trace the Logic:</u> Follow the recursive calls step-by-step to see how solutions are built from the bottom up.</p>
+<p><u>Master Complexity:</u> Understand why moving from O(n^2) to O(n(log n)) actually makes your code lightning-fast.</p>
+<p><u>Get Started:</u> Pick an algorithm from the sidebar. Whether you want to see how Karatsuba speeds up multiplication or how Strassen’s conquers matrices, just hit "Visualize" to see the math come to life.</p>
+      <div class="flow-pills">
+        <span class="pill pink">Problem</span>
+        <span class="arrow">→</span>
+        <span class="pill blue">Subproblem A</span>
+        <span class="plus">+</span>
+        <span class="pill green">Subproblem B</span>
+        <span class="arrow">→</span>
+        <span class="pill peach">Combined Solution</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Page: History -->
+  <section class="page hidden" id="page-history">
+    <div class="content-card pink-accent">
+      <div class="card-title" id="historyTitle"></div>
+      <div class="history-body" id="historyBody"></div>
+      <div class="quote-block" id="historyQuote"></div>
+    </div>
+  </section>
+
+  <!-- Page: How It Works -->
+  <section class="page hidden" id="page-howto">
+    <div class="content-card blue-accent">
+      <div class="card-title">How It Works</div>
+      <div class="tab-pills">
+        <button class="tab-pill active" data-tab="pseudo">Pseudocode</button>
+        <button class="tab-pill" data-tab="code">Code</button>
+      </div>
+      <div class="tab-content" id="tab-pseudo">
+        <pre class="code-block pseudo-block" id="pseudoContent"></pre>
+      </div>
+      <div class="tab-content hidden" id="tab-code">
+        <div class="lang-pills">
+          <button class="lang-pill active" data-lang="c">C</button>
+          <button class="lang-pill" data-lang="cpp">C++</button>
+          <button class="lang-pill" data-lang="python">Python</button>
+          <button class="lang-pill" data-lang="java">Java</button>
+        </div>
+        <div class="code-wrapper">
+          <button class="copy-btn" id="copyBtn">⎘ Copy</button>
+          <pre class="code-block" id="codeContent"></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Page: Visualizer -->
+  <section class="page hidden" id="page-viz">
+    <div class="content-card green-accent">
+      <div class="card-title">Watch It Think</div>
+      <p class="card-sub" id="vizSubtitle"></p>
+
+      <!-- Inputs -->
+      <div class="input-row" id="inputRow"></div>
+      <div class="input-hint" id="inputHint"></div>
+
+      <!-- Op Counter -->
+      <div class="op-counter" id="opCounter">
+        <div class="op-item">
+          <span class="op-label">Multiplications</span>
+          <span class="op-val" id="opMul">0</span>
+        </div>
+        <div class="op-divider"></div>
+        <div class="op-item">
+          <span class="op-label">Additions</span>
+          <span class="op-val" id="opAdd">0</span>
+        </div>
+        <div class="op-divider"></div>
+        <div class="op-item classical">
+          <span class="op-label">Classical would need</span>
+          <span class="op-val" id="opClassical">—</span>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="controls-bar">
+        <button class="ctrl-btn" id="ctrlReset" title="Reset">⏮</button>
+        <button class="ctrl-btn" id="ctrlPrev" title="Previous">⏪</button>
+        <button class="ctrl-btn primary" id="ctrlPlay" title="Play/Pause">▶</button>
+        <button class="ctrl-btn" id="ctrlNext" title="Next">⏩</button>
+        <div class="speed-wrap">
+          <span class="speed-label">Speed</span>
+          <input type="range" min="1" max="5" value="3" class="speed-slider" id="speedSlider"/>
+          <span class="speed-val" id="speedVal">med</span>
+        </div>
+        <div class="step-badge" id="stepBadge">0 / 0</div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+      <!-- Step description + quiz -->
+      <div class="step-desc" id="stepDesc">
+        Press <strong>Visualize</strong> to begin.
+      </div>
+      <div class="quiz-box hidden" id="quizBox">
+        <div class="quiz-q" id="quizQ"></div>
+        <div class="quiz-opts" id="quizOpts"></div>
+        <div class="quiz-feedback hidden" id="quizFeedback"></div>
+      </div>
+
+      <!-- Code sync + Tree (side by side) -->
+      <div class="viz-sync-tree-layout">
+        <div class="sync-wrap" id="syncWrap">
+          <div class="sync-header">
+            <span>Pseudocode Sync</span>
+            <label class="toggle-wrap">
+              <input type="checkbox" id="syncToggle" checked/>
+              <span class="toggle"></span>
+            </label>
+          </div>
+          <pre class="sync-code" id="syncCode"></pre>
+        </div>
+
+        <!-- Tree -->
+        <div class="tree-container">
+          <div class="tree-legend" id="treeLegend"></div>
+          <div class="tree-label">RECURSION TREE</div>
+          <div id="treeCanvas"></div>
+        </div>
+      </div>
+
+      <!-- Result -->
+      <div class="result-box hidden" id="resultBox">
+        <span class="result-check">✓</span>
+        <div>
+          <div class="result-val" id="resultVal"></div>
+          <div class="result-sub" id="resultSub"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Page: Complexity -->
+  <section class="page hidden" id="page-complexity">
+    <div class="content-card lavender-accent">
+      <div class="card-title">Why Is It Fast?</div>
+      <div id="complexityBody"></div>
+    </div>
+  </section>
+
+  <!-- Page: Master Theorem Calculator -->
+  <section class="page hidden" id="page-mastercalc">
+    <div class="content-card peach-accent">
+      <div class="card-title">Master Theorem Calculator</div>
+      <p class="card-sub">Enter a recurrence relation T(n) = aT(n/b) + f(n) and we'll solve it for you.</p>
+
+      <div class="master-inputs">
+        <div class="master-field">
+          <label>a (number of subproblems)</label>
+          <input type="number" id="masterA" value="3" min="1" class="master-input"/>
+        </div>
+        <div class="master-field">
+          <label>b (size reduction factor)</label>
+          <input type="number" id="masterB" value="2" min="2" class="master-input"/>
+        </div>
+        <div class="master-field">
+          <label>f(n) polynomial degree k (f(n) = O(n)^k)</label>
+          <input type="number" id="masterK" value="1" min="0" class="master-input"/>
+        </div>
+        <button class="viz-btn" id="masterCalcBtn">Calculate</button>
+      </div>
+
+      <div class="master-result hidden" id="masterResult">
+        <div class="master-recurrence" id="masterRecurrence"></div>
+        <div class="master-case" id="masterCase"></div>
+        <div class="master-solution" id="masterSolution"></div>
+        <div class="master-explanation" id="masterExplanation"></div>
+        <div class="master-tree" id="masterTree"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bottom nav -->
+  <nav class="page-nav" id="pageNav">
+    <button class="nav-pill active" data-page="intro">Intro</button>
+    <button class="nav-pill" data-page="history">History</button>
+    <button class="nav-pill" data-page="howto">Code</button>
+    <button class="nav-pill" data-page="viz">Visualize</button>
+    <button class="nav-pill" data-page="complexity">Complexity</button>
+  </nav>
+</main>
+
+<script src="js/content.js"></script>
+<script src="js/karatsuba.js"></script>
+<script src="js/maxsubarray.js"></script>
+<script src="js/strassen.js"></script>
+<script src="js/closestpair.js"></script>
+<script src="js/visualizer.js"></script>
+<script src="js/mastercalc.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
